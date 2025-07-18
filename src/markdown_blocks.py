@@ -1,52 +1,65 @@
-import re
 from enum import Enum
 
 from htmlnode import ParentNode
-from main import text_node_to_html_node
-from split_nodes import text_to_textnodes
-from textnode import TextNode, TextType
+from inline_markdown import text_to_textnodes
+from textnode import text_node_to_html_node, TextNode, TextType
 
 
 class BlockType(Enum):
-    PARAGRAPH = 'paragraph'
-    HEADING = 'heading'
-    CODE = 'code'
-    QUOTE = 'quote'
-    UNORDERED_LIST = 'unordered_list'
-    ORDERED_LIST = 'ordered_list'
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    OLIST = "ordered_list"
+    ULIST = "unordered_list"
 
 
-def block_to_block_type(block: str) -> BlockType:
-    if re.match('^#{1,6} ', block):
+def markdown_to_blocks(markdown):
+    blocks = markdown.split("\n\n")
+    filtered_blocks = []
+    for block in blocks:
+        if block == "":
+            continue
+        block = block.strip()
+        filtered_blocks.append(block)
+    return filtered_blocks
+
+
+def block_to_block_type(block):
+    lines = block.split("\n")
+
+    if block.startswith(("# ", "## ", "### ", "#### ", "##### ", "###### ")):
         return BlockType.HEADING
-    if re.match('^```.*```$', block, re.DOTALL):
+    if len(lines) > 1 and lines[0].startswith("```") and lines[-1].startswith("```"):
         return BlockType.CODE
-    if re.match(r'^>.*(\n>.*)*$', block):
+    if block.startswith(">"):
+        for line in lines:
+            if not line.startswith(">"):
+                return BlockType.PARAGRAPH
         return BlockType.QUOTE
-    if re.match(r'^- .*(\n- .*)*$', block):
-        return BlockType.UNORDERED_LIST
+    if block.startswith("- "):
+        for line in lines:
+            if not line.startswith("- "):
+                return BlockType.PARAGRAPH
+        return BlockType.ULIST
+    if block.startswith("1. "):
+        i = 1
+        for line in lines:
+            if not line.startswith(f"{i}. "):
+                return BlockType.PARAGRAPH
+            i += 1
+        return BlockType.OLIST
+    return BlockType.PARAGRAPH
 
-    lines = block.split('\n')
-    for i in range(0, len(lines)):
-        if not re.match(fr'^{i + 1}. ', lines[i]):
-            return BlockType.PARAGRAPH
-    return BlockType.ORDERED_LIST
 
-def markdown_to_blocks(markdown: str) -> list[str]:
-    blocks = [
-        block.strip()
-        for block in markdown.split("\n\n")
-        if not block.isspace()
-    ]
-    return blocks
-
-def markdown_to_html_node(markdown: str) -> ParentNode:
+def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
-    html_nodes = []
+    children = []
     for block in blocks:
         html_node = block_to_html_node(block)
-        html_nodes.append(html_node)
-    return ParentNode("div", html_nodes, None)
+        children.append(html_node)
+    return ParentNode("div", children, None)
+
 
 def block_to_html_node(block):
     block_type = block_to_block_type(block)
@@ -56,21 +69,23 @@ def block_to_html_node(block):
         return heading_to_html_node(block)
     if block_type == BlockType.CODE:
         return code_to_html_node(block)
-    if block_type == BlockType.ORDERED_LIST:
+    if block_type == BlockType.OLIST:
         return olist_to_html_node(block)
-    if block_type == BlockType.UNORDERED_LIST:
+    if block_type == BlockType.ULIST:
         return ulist_to_html_node(block)
     if block_type == BlockType.QUOTE:
         return quote_to_html_node(block)
     raise ValueError("invalid block type")
 
-def text_to_children(text: str) -> list[ParentNode]:
+
+def text_to_children(text):
     text_nodes = text_to_textnodes(text)
     children = []
     for text_node in text_nodes:
         html_node = text_node_to_html_node(text_node)
         children.append(html_node)
     return children
+
 
 def paragraph_to_html_node(block):
     lines = block.split("\n")
