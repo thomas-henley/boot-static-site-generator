@@ -23,6 +23,8 @@ def text_node_to_html_node(text_node: TextNode) -> HTMLNode:
         case _:
             raise ValueError(f"Invalid text type")
 
+def copy_files():
+
 
 def main():
     pass
