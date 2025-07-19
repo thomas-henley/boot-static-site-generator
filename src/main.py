@@ -1,24 +1,22 @@
 import os
 import shutil
+import sys
 
 from copystatic import copy_files_recursive, generate_pages_recursive
 
 dir_path_static = "./static"
 dir_path_public = "./public"
+dir_path_docs = "./docs"
 
 def main():
-    if os.path.exists(dir_path_public):
-        shutil.rmtree(dir_path_public)
+    basepath = sys.argv[1] or "/"
 
-    copy_files_recursive(dir_path_static, dir_path_public)
+    if os.path.exists(dir_path_docs):
+        shutil.rmtree(dir_path_docs)
 
-    # generate_page("content/index.md", "template.html", "public/index.html")
-    # generate_page("content/blog/glorfindel/index.md", "template.html", "public/blog/glorfindel/index.html")
-    # generate_page("content/blog/tom/index.md", "template.html", "public/blog/tom/index.html")
-    # generate_page("content/blog/majesty/index.md", "template.html", "public/blog/majesty/index.html")
-    # generate_page("content/contact/index.md", "template.html", "public/contact/index.html")
+    copy_files_recursive(dir_path_static, dir_path_docs)
 
-    generate_pages_recursive("content", "template.html", dir_path_public)
+    generate_pages_recursive("./content", "template.html", dir_path_docs, basepath)
 
 
 main()
