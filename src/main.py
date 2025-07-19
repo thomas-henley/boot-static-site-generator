@@ -18,7 +18,7 @@ def main():
     # generate_page("content/blog/majesty/index.md", "template.html", "public/blog/majesty/index.html")
     # generate_page("content/contact/index.md", "template.html", "public/contact/index.html")
 
-    generate_pages_recursive(dir_path_static, "template.html", dir_path_public)
+    generate_pages_recursive("content", "template.html", dir_path_public)
 
 
 main()

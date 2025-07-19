@@ -34,6 +34,7 @@ def generate_page(from_path: str, template_path: str, dest_path: str):
 def generate_pages_recursive(dir_path_content: str, template_path: str, dest_dir_path: str):
     for entry in os.listdir(dir_path_content):
         if entry.endswith(".md"):
-            generate_page(os.path.join(dir_path_content, entry), template_path, os.path.join(dest_dir_path, entry))
+            html_name = entry.replace(".md", ".html")
+            generate_page(os.path.join(dir_path_content, entry), template_path, os.path.join(dest_dir_path, html_name))
         else:
-            copy_files_recursive(os.path.join(dir_path_content, entry), os.path.join(dest_dir_path, entry))
+            generate_pages_recursive(os.path.join(dir_path_content, entry), template_path, os.path.join(dest_dir_path, entry))
