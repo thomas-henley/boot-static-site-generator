@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from htmlnode import ParentNode
@@ -148,3 +149,6 @@ def quote_to_html_node(block):
     content = " ".join(new_lines)
     children = text_to_children(content)
     return ParentNode("blockquote", children)
+
+def extract_title(markdown: str) -> str:
+    return re.findall(r'# (.*)', markdown)[0]

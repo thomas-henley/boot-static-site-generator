@@ -4,6 +4,7 @@ from markdown_blocks import (
     markdown_to_blocks,
     block_to_block_type,
     BlockType,
+    extract_title
 )
 
 
@@ -163,6 +164,11 @@ the **same** even with inline stuff
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
 
+
+    def test_extract_title(self):
+        markdown = "# this is the title\nthis is not"
+        expected = "this is the title"
+        self.assertEqual(expected, extract_title(markdown))
 
 if __name__ == "__main__":
     unittest.main()
